@@ -51,10 +51,7 @@
                     <a class="nav-link me-3" aria-current="page" href="/data-apotek.php">Data Apotek</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link me-3" href="/scanning.php">Scanning</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link me-3" href="/rekapitulasi.php">Rekapitulasi</a>
+                    <a class="nav-link me-3" href="/penjualan.php">Penjualan</a>
                 </li>
                 <li class="nav-item">
                     <form method="POST">
@@ -72,8 +69,11 @@
                 <h2 style="color:rgba(135,103,78,1);"><b>TAMBAHKAN OBAT</b></h2>
             </div>
             <div class="col d-flex justify-content-end">
-                <a class="btn btn-primary" href="tambah-obat.php">Tambahkan Kartu</a>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Tambahkan Kartu</button>
             </div>
+        </div>
+        <div class="col">
+            <h4 style="color:rgba(135,103,78,1);"><b>Kartu</b></h4>
         </div>
         <table id="myTable" class="display">
             <thead>
@@ -93,6 +93,35 @@
                 <?php } ?>
             </tbody>
         </table>
+        <form>
+        <div class="col">
+            <h4 style="color:rgba(135,103,78,1);"><b>Data Obat</b></h4>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nama Obat</label>
+            <input type="text" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Kandungan Obat</label>
+            <textarea class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Jumlah Penerimaan</label>
+            <input type="number" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tanggal Penerimaan</label>
+            <input type="date" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Tanggal Kadaluarsa</label>
+            <input type="date" class="form-control">
+        </div>
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">Tambahkan</button>
+        </div>
+        </form>
+        <br><br><br>
     </div>
 
     <!-- Modal -->
@@ -157,6 +186,24 @@
             </div>
             </div>
         </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Scan Kartu</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Silahkan Scan Kartu...
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+        </div>
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>

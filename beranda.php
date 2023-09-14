@@ -49,10 +49,7 @@
                     <a class="nav-link me-3" href="/data-apotek.php">Data Obat</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link me-3" href="/scanning.php">Scanning</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link me-3" href="/rekapitulasi.php">Rekapitulasi</a>
+                    <a class="nav-link me-3" href="/penjualan.php">Penjualan</a>
                 </li>
                 <li class="nav-item">
                     <form method="POST">

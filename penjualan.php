@@ -48,10 +48,10 @@
                     <a class="nav-link me-3" aria-current="page"  href="/data-gudang.php">Data Gudang</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link me-3 active" aria-current="page"  href="/data-apotek.php"><b>Data Apotek</b></a>
+                    <a class="nav-link me-3 active" href="/data-apotek.php">Data Apotek</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link me-3" href="/penjualan.php">Penjualan</a>
+                    <a class="nav-link me-3 active" href="/penjualan.php"><b>Penjualan</b></a>
                 </li>
                 <li class="nav-item">
                     <form method="POST">
@@ -69,8 +69,7 @@
                 <h2 style="color:rgba(135,103,78,1);"><b>DATA OBAT</b></h2>
             </div>
             <div class="col d-flex justify-content-end">
-                <button class="btn btn-secondary me-3" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Cari Obat</button>
-                <button class="btn btn-primary" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Tambahkan Data</button>
+                <button class="btn btn-primary" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Tambahkan Keranjang</button>
             </div>
         </div>
         <table id="myTable" class="display">
@@ -80,15 +79,16 @@
                     <th>No Kartu</th>
                     <th>Nama Obat</th>
                     <th>Kandungan Obat</th>
-                    <th>Jumlah Penerimaan</th>
                     <th>Tanggal Penerimaan</th>
                     <th>Tanggal Kadaluarsa</th>
                     <th>Status</th>
+                    <th>Jumlah</th>
+                    <th>Harga</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                <?php for($a=0; $a<100; $a++){?>
+                <?php for($a=0; $a<3; $a++){?>
                 <tr>
                     <td><?=$a+1?></td>
                     <td>AA:BB:CC:DD:EE:FF</td>
@@ -96,23 +96,26 @@
                     <td>Data 3</td>
                     <td>Data 4</td>
                     <td>Data 5</td>
-                    <td>Data 6</td>
-                    <?php 
-                    if($a%3 == 0){
-                        echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
-                    }
-                    else if($a%3 == 1){
-                        echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
-                    }
-                    else if($a%3 == 2){
-                        echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
-                    }
-                    ?>
-                    <td style="width:150px;"><button class="btn btn-secondary me-2">Edit</button><button class="btn btn-danger">Hapus</button></td>
+                    <td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>
+                    <td><input type="number" value="1" style="width:50px;"></td>
+                    <td style="width:100px;">Rp. 25.000</td>
+                    <td style="width:150px;"><button class="btn btn-danger">Hapus</button></td>
                 </tr>
                 <?php } ?>
             </tbody>
         </table>
+        <div class="row mb-5 mt-2">
+            <div class="col d-flex justify-content-end">                
+                <div>
+
+                    <h2 style="color:rgba(135,103,78,1);"><b>Rincian Pembelanjaan</b></h2>
+                    <h4 style="color:black;"><b>Total Harga : Rp. 75.000</b></h4>
+                    <div class="col d-flex justify-content-end">     
+                        <button class="btn btn-success" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Checkout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Modal -->

@@ -51,10 +51,7 @@
                     <a class="nav-link me-3" aria-current="page" href="/data-apotek.php">Data Apotek</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link me-3" href="/scanning.php">Scanning</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link me-3" href="/rekapitulasi.php">Rekapitulasi</a>
+                    <a class="nav-link me-3" href="/penjualan.php">Penjualan</a>
                 </li>
                 <li class="nav-item">
                     <form method="POST">
@@ -72,6 +69,7 @@
                 <h2 style="color:rgba(135,103,78,1);"><b>DATA OBAT</b></h2>
             </div>
             <div class="col d-flex justify-content-end">
+                <button class="btn btn-secondary me-3" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop2">Cari Obat</button>
                 <a class="btn btn-primary" href="tambah-obat.php">Tambahkan Data</a>
             </div>
         </div>
@@ -99,8 +97,18 @@
                     <td>Data 4</td>
                     <td>Data 5</td>
                     <td>Data 6</td>
-                    <td>Data 7</td>
-                    <td><button class="btn btn-secondary me-2">Edit</button><button class="btn btn-danger">Hapus</button></td>
+                    <?php 
+                    if($a%3 == 0){
+                        echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
+                    }
+                    else if($a%3 == 1){
+                        echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
+                    }
+                    else if($a%3 == 2){
+                        echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
+                    }
+                    ?>
+                    <td style="width:150px;"><button class="btn btn-secondary me-2">Edit</button><button class="btn btn-danger">Hapus</button></td>
                 </tr>
                 <?php } ?>
             </tbody>
@@ -169,6 +177,25 @@
             </div>
             </div>
         </div>
+    </div>
+
+    
+    <!-- Modal2 -->
+    <div class="modal fade" id="staticBackdrop2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h1 class="modal-title fs-5" id="staticBackdropLabel">Scan Kartu</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            Silahkan Scan Kartu...
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+        </div>
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
