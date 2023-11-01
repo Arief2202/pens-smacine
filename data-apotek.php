@@ -1,4 +1,6 @@
 <?php
+  include "koneksi.php";
+  date_default_timezone_set("Asia/Jakarta");
   session_start();
   if(!isset($_SESSION['username']) || $_SESSION['username'] != 'admin'){
     header("Location: /login.php");
@@ -10,7 +12,17 @@
     header("Location: /login.php");
     exit();
   }
-
+  function cek_kadaluarsa($stop){
+    $date1 = new DateTime($stop);
+    $date2 = new DateTime(date('Y/m/d H:i:s'));
+    $interval = $date1->diff($date2);
+    if($date1 > $date2){
+        return intval($interval->days);
+    }
+    else{
+        return intval($interval->days)*-1;
+    }
+}
 ?>
 
 
@@ -20,8 +32,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SMACINE | Data Obat</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/jquery.dataTables.css" rel="stylesheet">
   
     <style>
       .center{
@@ -69,7 +81,7 @@
                 <h2 style="color:rgba(135,103,78,1);"><b>DATA OBAT</b></h2>
             </div>
             <div class="col d-flex justify-content-end">
-                <button class="btn btn-secondary me-3" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Cari Obat</button>
+                <!-- <button class="btn btn-secondary me-3" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Cari Obat</button> -->
                 <button class="btn btn-primary" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Tambahkan Data</button>
             </div>
         </div>
@@ -79,6 +91,7 @@
                     <th>No</th>
                     <th>No Kartu</th>
                     <th>Nama Obat</th>
+                    <th>Jenis Obat</th>
                     <th>Kandungan Obat</th>
                     <th>Jumlah Penerimaan</th>
                     <th>Tanggal Penerimaan</th>
@@ -88,27 +101,34 @@
                 </tr>
             </thead>
             <tbody>
-                <?php for($a=0; $a<100; $a++){?>
+                <?php 
+                $result = mysqli_query($koneksi, "SELECT * FROM data_apotek");
+                $index = 1;
+                while($data = mysqli_fetch_object($result)){
+                    $kartu = mysqli_fetch_object(mysqli_query($koneksi, "SELECT * FROM card WHERE card = \"".$data->card."\""));
+                    $obat = mysqli_fetch_object(mysqli_query($koneksi, "SELECT * FROM data_gudang WHERE id = \"".$kartu->obat_id."\""));                    
+                ?>
                 <tr>
-                    <td><?=$a+1?></td>
-                    <td>AA:BB:CC:DD:EE:FF</td>
-                    <td>Data 2</td>
-                    <td>Data 3</td>
-                    <td>Data 4</td>
-                    <td>Data 5</td>
-                    <td>Data 6</td>
+                    <td><?=$index++?></td>
+                    <td><?=$kartu->card?></td>
+                    <td><?=$obat->nama_obat?></td>
+                    <td><?=$obat->jenis_obat?></td>
+                    <td><?=$obat->kandungan_obat?></td>
+                    <td><?=$obat->jumlah_penerimaan?></td>
+                    <td><?=date("d M Y", strtotime($obat->tanggal_penerimaan))?></td>
+                    <td><?=date("d M Y", strtotime($obat->tanggal_kadaluarsa))?></td>                    
                     <?php 
-                    if($a%3 == 0){
-                        echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
-                    }
-                    else if($a%3 == 1){
-                        echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
-                    }
-                    else if($a%3 == 2){
-                        echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
-                    }
+                        if(cek_kadaluarsa($obat->tanggal_kadaluarsa) < 0){
+                            echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
+                        }
+                        else if(cek_kadaluarsa($obat->tanggal_kadaluarsa) < 7){
+                            echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
+                        }
+                        else{
+                            echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
+                        }
                     ?>
-                    <td style="width:150px;"><button class="btn btn-secondary me-2">Edit</button><button class="btn btn-danger">Hapus</button></td>
+                    <td style="width:150px;"><a class="btn btn-danger" href="/delObatApotik.php?id=<?=$data->id?>">Hapus</a></td>
                 </tr>
                 <?php } ?>
             </tbody>
@@ -123,7 +143,7 @@
             <h1 class="modal-title fs-5" id="staticBackdropLabel">Scan Kartu</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id = "card_area">
             Silahkan Scan Kartu...
         </div>
         <div class="modal-footer">
@@ -134,13 +154,63 @@
     </div>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/js/jquery.dataTables.js"></script>
     <script type="text/javascript">
-        $(document).ready( function () {
+        $(document).ready( function () {            
+            var xhttp = new XMLHttpRequest();      
+            xhttp.open("GET", "deleteScanTambahApotek.php", true);
+            xhttp.send(null);
+            var interval = null;            
+            var id_table = null;
+            function functionDetectCard(id){
+                var xhttp = new XMLHttpRequest();        
+                function stateck() {
+                    if(xhttp.readyState == 4){
+                        if(xhttp.responseText == 'null') id_table=null;
+                        const res = JSON.parse(xhttp.responseText);
+                        if(id_table == null) id_table = res.id;
+                        else{
+                            if(res.card != 'scan'){
+                                document.getElementById("card_area").innerHTML = res.card;
+                                setTimeout(function(){
+                                    $('#staticBackdrop').modal('hide');
+                                    setTimeout(function(){
+                                        window.location.replace("/data-apotek.php");
+                                    },1000);
+                                },3000);
+                            }
+                        }
+                        
+                        console.log(id);
+                    }
+                }
+                xhttp.onreadystatechange = stateck;
+                if(id_table == null) xhttp.open("GET", "ajaxScanTambahApotek.php", true);
+                else xhttp.open("GET", "ajaxScanTambahApotek.php?id="+id, true);
+                xhttp.send(null);
+            }
+
             $('#myTable').DataTable({
                 scrollX:true,
+            });
+
+            $('#staticBackdrop').on('shown.bs.modal', function (e) {
+                console.log("Modal Opened, close in 3 seconds");
+                
+                // $('#staticBackdrop').modal('hide');
+
+                interval = setInterval(function() {
+                    functionDetectCard(id_table);
+                }, 1000);
+            });
+
+            $('#staticBackdrop').on('hidden.bs.modal', function (e) {                
+                var xhttp = new XMLHttpRequest();      
+                xhttp.open("GET", "deleteScanTambahApotek.php", true);
+                xhttp.send(null);
+                clearInterval(interval);
             });
         } );
     </script>

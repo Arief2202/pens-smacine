@@ -1,16 +1,32 @@
 <?php
-  session_start();
-  if(!isset($_SESSION['username']) || $_SESSION['username'] != 'admin'){
-    header("Location: /login.php");
-    exit();
-  }
+    include "koneksi.php";
+    date_default_timezone_set("Asia/Jakarta");
+    session_start();
+    if(!isset($_SESSION['username']) || $_SESSION['username'] != 'admin'){
+        header("Location: /login.php");
+        exit();
+    }
 
-  if(isset($_POST['logout'])){
-    $_SESSION['username'] = null;
-    header("Location: /login.php");
-    exit();
-  }
-
+    if(isset($_POST['logout'])){
+        $_SESSION['username'] = null;
+        header("Location: /login.php");
+        exit();
+    }
+    if(isset($_POST['delete'])){
+        $sql = "DELETE FROM `data_gudang` WHERE `data_gudang`.`id` = ".$_POST['delete'].";";
+        mysqli_query($koneksi, $sql);
+    }
+    function cek_kadaluarsa($stop){
+        $date1 = new DateTime($stop);
+        $date2 = new DateTime(date('Y/m/d H:i:s'));
+        $interval = $date1->diff($date2);
+        if($date1 > $date2){
+            return intval($interval->days);
+        }
+        else{
+            return intval($interval->days)*-1;
+        }
+    }
 ?>
 
 
@@ -20,8 +36,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SMACINE | Data Obat</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/jquery.dataTables.css" rel="stylesheet">
   
     <style>
       .center{
@@ -69,7 +85,7 @@
                 <h2 style="color:rgba(135,103,78,1);"><b>DATA OBAT</b></h2>
             </div>
             <div class="col d-flex justify-content-end">
-                <button class="btn btn-secondary me-3" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop2">Cari Obat</button>
+                <!-- <button class="btn btn-secondary me-3" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop2">Cari Obat</button> -->
                 <a class="btn btn-primary" href="tambah-obat.php">Tambahkan Data</a>
             </div>
         </div>
@@ -79,6 +95,7 @@
                     <th>No</th>
                     <th>No Kartu</th>
                     <th>Nama Obat</th>
+                    <th>Jenis Obat</th>
                     <th>Kandungan Obat</th>
                     <th>Jumlah Penerimaan</th>
                     <th>Tanggal Penerimaan</th>
@@ -88,27 +105,45 @@
                 </tr>
             </thead>
             <tbody>
-                <?php for($a=0; $a<100; $a++){?>
+                <?php 
+                    $sql = "SELECT * FROM `data_gudang`";
+                    $result = mysqli_query($koneksi, $sql);
+                    while($data = mysqli_fetch_object($result)){
+                ?>
                 <tr>
                     <td><?=$a+1?></td>
-                    <td><button class="btn" style="background-color:rgba(135,103,78,1); color:white;" data-bs-toggle="modal" data-bs-target="#exampleModal">Lihat</button></td>
-                    <td>Data 2</td>
-                    <td>Data 3</td>
-                    <td>Data 4</td>
-                    <td>Data 5</td>
-                    <td>Data 6</td>
+                    <!-- <td>
+                        <button 
+                            <?php 
+                                // echo "onclick=\"showModal(\"".$data->nama_obat."\")\" ";
+                            ?>
+                            class="btn" style="background-color:rgba(135,103,78,1); color:white;">Lihat
+                        </button>
+                    </td> -->
+                    <td><button onclick='showModal(this)' data-obat='<?= json_encode($data) ?>' data-expired='<?= cek_kadaluarsa($data->tanggal_kadaluarsa)?>' class="btn" style="background-color:rgba(135,103,78,1); color:white;">Lihat</button></td>
+                    <td><?=$data->nama_obat?></td>
+                    <td><?=$data->jenis_obat?></td>
+                    <td><?=$data->kandungan_obat?></td>
+                    <td><?=$data->jumlah_penerimaan?></td>
+                    <td><?=date("d M Y", strtotime($data->tanggal_penerimaan))?></td>
+                    <td><?=date("d M Y", strtotime($data->tanggal_kadaluarsa))?></td>
                     <?php 
-                    if($a%3 == 0){
-                        echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
-                    }
-                    else if($a%3 == 1){
-                        echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
-                    }
-                    else if($a%3 == 2){
-                        echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
-                    }
+                        if(cek_kadaluarsa($data->tanggal_kadaluarsa) < 0){
+                            echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
+                        }
+                        else if(cek_kadaluarsa($data->tanggal_kadaluarsa) < 7){
+                            echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
+                        }
+                        else{
+                            echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
+                        }
                     ?>
-                    <td style="width:150px;"><button class="btn btn-secondary me-2">Edit</button><button class="btn btn-danger">Hapus</button></td>
+                    <td style="width:150px;">
+                        <form method="post">
+                            <a class="btn btn-secondary me-2" href="/tambah-obat.php?id=<?=$data->id?>">Edit</a>
+                            <button type="submit" class="btn btn-danger" name="delete" value="<?=$data->id?>">Hapus</button>
+                        </form>
+                    </td>
                 </tr>
                 <?php } ?>
             </tbody>
@@ -128,27 +163,31 @@
                     <tbody>
                         <tr>
                             <td style="width:180px;">Nama Obat</td>
-                            <td>: Data 1</td>
+                            <td>: <p id="m_namaObat" style="display:inline;"></p></td>
+                        </tr>
+                        <tr>
+                            <td style="width:180px;">Jenis Obat</td>
+                            <td>: <p id="m_jenisObat" style="display:inline;"></p></td>
                         </tr>
                         <tr>
                             <td style="width:180px;">Kandungan Obat</td>
-                            <td>: Data 1</td>
+                            <td>: <p id="m_kandunganObat" style="display:inline;"></p></td>
                         </tr>
                         <tr>
                             <td style="width:180px;">Jumlah Penerimaan</td>
-                            <td>: Data 1</td>
+                            <td>: <p id="m_jumlahPenerimaan" style="display:inline;"></p></td>
                         </tr>
                         <tr>
                             <td style="width:180px;">Tanggal Penerimaan</td>
-                            <td>: Data 1</td>
+                            <td>: <p id="m_tanggalPenerimaan" style="display:inline;"></p></td>
                         </tr>
                         <tr>
                             <td style="width:180px;">Tanggal Kadaluarsa</td>
-                            <td>: Data 1</td>
+                            <td>: <p id="m_tanggalKadaluarsa" style="display:inline;"></p></td>
                         </tr>
                         <tr>
                             <td style="width:180px;">Status</td>
-                            <td>: Data 1</td>
+                            <td>: <p id="m_status" style="display:inline;"></p></td>
                         </tr>
                     </tbody>
                 </table>
@@ -161,14 +200,7 @@
                             <!-- <th>Aksi</th> -->
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php for($a=0; $a<100; $a++){?>
-                        <tr>
-                            <td style="font-size:14px;"><?=$a+1?></td>
-                            <td style="font-size:14px;">AA:BB:CC:DD:EE</td>
-                            <!-- <td style="font-size:10px;"><button class="btn btn-secondary me-2">Edit</button><button class="btn btn-danger">Hapus</button></td> -->
-                        </tr>
-                        <?php } ?>
+                    <tbody id="m_card">                        
                     </tbody>
                 </table>
             </div>
@@ -198,17 +230,36 @@
     </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/jquery-3.7.1.min.js"></script>
+    <script src="/js/jquery.dataTables.js"></script>
     <script type="text/javascript">
         $(document).ready( function () {
+            var xhttp = new XMLHttpRequest();      
+            xhttp.open("GET", "deleteScanTambahApotek.php", true);
+            xhttp.send(null);
             $('#myTable').DataTable();
-            $('#myTable2').DataTable( {
-                pageLength : 5,
-                lengthMenu: [[5, 10, 20], [5, 10, 20]]
-            });
         } );
+        var table = $('#myTable2').DataTable( {
+            pageLength : 5,
+            lengthMenu: [[5, 10, 20], [5, 10, 20]]
+        });
+
+        function showModal(test){
+            var obat = JSON.parse(test.getAttribute('data-obat'));
+            var data_expired = parseInt(test.getAttribute('data-expired'));
+
+            table.ajax.url('/ajaxTable.php?id='+obat.id).load();
+            console.log(obat);
+            document.getElementById("m_namaObat").innerHTML=obat.nama_obat;
+            document.getElementById("m_jenisObat").innerHTML=obat.jenis_obat;
+            document.getElementById("m_kandunganObat").innerHTML=obat.kandungan_obat;
+            document.getElementById("m_jumlahPenerimaan").innerHTML=obat.jumlah_penerimaan;
+            document.getElementById("m_tanggalPenerimaan").innerHTML=obat.tanggal_penerimaan;
+            document.getElementById("m_tanggalKadaluarsa").innerHTML=obat.tanggal_kadaluarsa;
+            document.getElementById("m_status").innerHTML=data_expired < 0 ? "Kadaluarsa" : (data_expired < 7 ? "Hampir Kadaluarsa" : "Aman");
+            $('#exampleModal').modal('show');
+        }
     </script>
   </body>
 </html>
