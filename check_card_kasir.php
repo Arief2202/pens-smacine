@@ -7,9 +7,15 @@
         $resultSearchCard = mysqli_fetch_object(mysqli_query($koneksi, $sqlSearchCard));
         $sqlSearchCard2 = "SELECT * FROM card WHERE card=\"".$card."\";";
         $resultSearchCard2 = mysqli_fetch_object(mysqli_query($koneksi, $sqlSearchCard2));
+        
 
+        $sqlSearchCardPenjualan = "SELECT * FROM data_penjualan WHERE card=\"".$card."\" AND checked_out = 0;";
+        $resultSearchCardPenjualan = mysqli_fetch_object(mysqli_query($koneksi, $sqlSearchCardPenjualan));
+        
         $sql = "SELECT * FROM data_apotek WHERE card=\"scan\";";
         $result = mysqli_fetch_object(mysqli_query($koneksi, $sql));
+        $sqlPenjualan = "SELECT * FROM data_penjualan WHERE card=\"scan\";";
+        $resultPenjualan = mysqli_fetch_object(mysqli_query($koneksi, $sqlPenjualan));
         if($result){
             if($resultSearchCard){
                 echo json_encode([
@@ -31,6 +37,30 @@
                 echo json_encode([
                     'status' => 'success',
                     'pesan' => "Berhasil input kartu ke data baru"
+                ]);
+            }
+        }
+        else if($resultPenjualan){
+            if($resultSearchCardPenjualan){
+                echo json_encode([
+                    'status' => 'failed',
+                    'pesan' => "Gagal input obat ke penjualan, kartu sudah ada di keranjang penjualan"
+                ]);
+
+            }
+            else if (!$resultSearchCard2){
+                echo json_encode([
+                    'status' => 'failed',
+                    'pesan' => "Gagal input kartu ke data baru, Kartu tidak ditemukan di database gudang"
+                ]);
+            }
+            else{
+                $sql = "UPDATE `data_penjualan` SET `card` = '".$card."' WHERE `data_penjualan`.`id` = ".$resultPenjualan->id.";";
+                $result = mysqli_query($koneksi, $sql);
+                
+                echo json_encode([
+                    'status' => 'success',
+                    'pesan' => "Berhasil Menambahkan Obat di Penjualan"
                 ]);
             }
         }

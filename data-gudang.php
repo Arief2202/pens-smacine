@@ -58,9 +58,6 @@
             <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link me-3" href="/beranda.php">Beranda</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link me-3 active" aria-current="page" href="/data-gudang.php"><b>Data Gudang</b></a>
                 </li>
                 <li class="nav-item">
@@ -97,7 +94,11 @@
                     <th>Nama Obat</th>
                     <th>Jenis Obat</th>
                     <th>Kandungan Obat</th>
-                    <th>Jumlah Penerimaan</th>
+                    <th>Jumlah Box</th>
+                    <th>Sisa Box</th>
+                    <th>Jumlah Obat Perbox</th>
+                    <th>Lokasi Rak</th>
+                    <th>Harga</th>
                     <th>Tanggal Penerimaan</th>
                     <th>Tanggal Kadaluarsa</th>
                     <th>Status</th>
@@ -109,6 +110,13 @@
                     $sql = "SELECT * FROM `data_gudang`";
                     $result = mysqli_query($koneksi, $sql);
                     while($data = mysqli_fetch_object($result)){
+                        $result2 = mysqli_query($koneksi, "SELECT * FROM `card` WHERE obat_id = ".$data->id);
+                        $jumlah_box = $result2->num_rows;
+                        $jumlah_box_apotek = 0;
+                        while($data2 = mysqli_fetch_object($result2)){
+                            $result3 = mysqli_fetch_object(mysqli_query($koneksi, "SELECT * FROM `data_apotek` WHERE card = '".$data2->card."'"));
+                            if($result3) $jumlah_box_apotek++;
+                        }
                 ?>
                 <tr>
                     <td><?=$a+1?></td>
@@ -124,7 +132,11 @@
                     <td><?=$data->nama_obat?></td>
                     <td><?=$data->jenis_obat?></td>
                     <td><?=$data->kandungan_obat?></td>
-                    <td><?=$data->jumlah_penerimaan?></td>
+                    <td><?=$jumlah_box?></td>
+                    <td><?=$jumlah_box-$jumlah_box_apotek?></td>
+                    <td><?=$data->jumlah_perbox?></td>
+                    <td><?=$data->lokasi_rak?></td>
+                    <td>Rp. <?=number_format($data->harga, 2, ",", ".")?></td>
                     <td><?=date("d M Y", strtotime($data->tanggal_penerimaan))?></td>
                     <td><?=date("d M Y", strtotime($data->tanggal_kadaluarsa))?></td>
                     <?php 

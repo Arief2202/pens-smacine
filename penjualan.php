@@ -1,4 +1,6 @@
 <?php
+  include "koneksi.php";
+  date_default_timezone_set("Asia/Jakarta");
   session_start();
   if(!isset($_SESSION['username']) || $_SESSION['username'] != 'admin'){
     header("Location: /login.php");
@@ -7,10 +9,30 @@
 
   if(isset($_POST['logout'])){
     $_SESSION['username'] = null;
-    header("Location: /login.php");
+    header("Location: /");
     exit();
   }
 
+  if(isset($_POST['updateJumlah'])){
+    mysqli_query($koneksi, "UPDATE `data_penjualan` SET `jumlah` = '".$_POST['jumlah']."' WHERE `data_penjualan`.`id` = ".$_POST['id'].";");
+    header("Location: /penjualan.php");
+  }
+  if(isset($_POST['checkout'])){
+    mysqli_query($koneksi, "UPDATE `data_penjualan` SET `checked_out` = 1 WHERE `data_penjualan`.`checked_out` = 0;");
+    header("Location: /penjualan.php");
+  }
+
+  function cek_kadaluarsa($stop){
+    $date1 = new DateTime($stop);
+    $date2 = new DateTime(date('Y/m/d H:i:s'));
+    $interval = $date1->diff($date2);
+    if($date1 > $date2){
+        return intval($interval->days);
+    }
+    else{
+        return intval($interval->days)*-1;
+    }
+}
 ?>
 
 
@@ -78,27 +100,50 @@
                     <th>No</th>
                     <th>No Kartu</th>
                     <th>Nama Obat</th>
-                    <th>Kandungan Obat</th>
-                    <th>Tanggal Penerimaan</th>
                     <th>Tanggal Kadaluarsa</th>
                     <th>Status</th>
                     <th>Jumlah</th>
-                    <th>Harga</th>
+                    <th>Harga Per Pcs</th>
+                    <th>Harga Total</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                <?php for($a=0; $a<3; $a++){?>
+                <?php 
+                $result = mysqli_query($koneksi, "SELECT * FROM data_penjualan WHERE checked_out = 0 AND card != 'scan'");
+                $totalAll = 0;
+                while($data = mysqli_fetch_object($result)){
+                    $card = mysqli_fetch_object(mysqli_query($koneksi, "SELECT * FROM card WHERE card = '".$data->card."'"));
+                    $obat = mysqli_fetch_object(mysqli_query($koneksi, "SELECT * FROM data_gudang WHERE id = ".$card->obat_id));
+                    $totalAll += $obat->harga*$data->jumlah;
+                ?>
                 <tr>
                     <td><?=$a+1?></td>
-                    <td>AA:BB:CC:DD:EE:FF</td>
-                    <td>Data 2</td>
-                    <td>Data 3</td>
-                    <td>Data 4</td>
-                    <td>Data 5</td>
-                    <td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>
-                    <td><input type="number" value="1" style="width:50px;"></td>
-                    <td style="width:100px;">Rp. 25.000</td>
+                    <td><?=$data->card?></td>
+                    <td><?=$obat->nama_obat?></td>
+                    <td><?=date("d M Y", strtotime($obat->tanggal_kadaluarsa));?></td>
+                    <?php 
+                        if(cek_kadaluarsa($obat->tanggal_kadaluarsa) < 0){
+                            echo '<td style="width:180px;"><div class="alert alert-danger" role="alert">Kadaluwarsa</div></td>';
+                        }
+                        else if(cek_kadaluarsa($obat->tanggal_kadaluarsa) < 7){
+                            echo '<td style="width:180px;"><div class="alert alert-warning" role="alert">Hampir Kadaluwarsa</div></td>';
+                        }
+                        else{
+                            echo '<td style="width:180px;"><div class="alert alert-success" role="alert">Aman</div></td>';
+                        }
+                    ?>
+                    <td style="width:200px">
+                        <form method="POST">
+                            <div class="input-group mb-3">
+                                <input type="hidden" name="id" value="<?=$data->id?>">
+                                <input type="number" class="form-control" style="width:100px" name="jumlah" value="<?=$data->jumlah?>" min="1" max="<?=$obat->jumlah_perbox?>" required>
+                                <button class="btn btn-outline-secondary" type="submit" name="updateJumlah" id="button-addon2">Update</button>
+                            </div>
+                        </form>
+                    </td>
+                    <td style="width:150px">Rp. <?=number_format($obat->harga, 2, ",", ".")?></td>
+                    <td style="width:150px">Rp. <?=number_format($obat->harga*$data->jumlah, 2, ",", ".")?></td>
                     <td style="width:150px;"><button class="btn btn-danger">Hapus</button></td>
                 </tr>
                 <?php } ?>
@@ -109,10 +154,12 @@
                 <div>
 
                     <h2 style="color:rgba(135,103,78,1);"><b>Rincian Pembelanjaan</b></h2>
-                    <h4 style="color:black;"><b>Total Harga : Rp. 75.000</b></h4>
-                    <div class="col d-flex justify-content-end">     
-                        <button class="btn btn-success" href="tambah-obat.php" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Checkout</button>
-                    </div>
+                    <h4 style="color:black;"><b>Total Harga : Rp. <?=number_format($totalAll, 2, ",", ".")?></td></b></h4>
+                    <form method="POST">
+                        <div class="col d-flex justify-content-end">     
+                            <button class="btn btn-success" name="checkout" type="submit">Checkout</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -126,7 +173,7 @@
             <h1 class="modal-title fs-5" id="staticBackdropLabel">Scan Kartu</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" id = "card_area">
             Silahkan Scan Kartu...
         </div>
         <div class="modal-footer">
@@ -141,9 +188,59 @@
     <script src="/js/jquery-3.7.1.min.js"></script>
     <script src="/js/jquery.dataTables.js"></script>
     <script type="text/javascript">
-        $(document).ready( function () {
+        $(document).ready( function () {            
+            var xhttp = new XMLHttpRequest();      
+            xhttp.open("GET", "deleteScanTambahPenjualan.php", true);
+            xhttp.send(null);
+            var interval = null;            
+            var id_table = null;
+            function functionDetectCard(id){
+                var xhttp = new XMLHttpRequest();        
+                function stateck() {
+                    if(xhttp.readyState == 4){
+                        if(xhttp.responseText == 'null') id_table=null;
+                        const res = JSON.parse(xhttp.responseText);
+                        if(id_table == null) id_table = res.id;
+                        else{
+                            if(res.card != 'scan'){
+                                document.getElementById("card_area").innerHTML = res.card;
+                                setTimeout(function(){
+                                    $('#staticBackdrop').modal('hide');
+                                    setTimeout(function(){
+                                        window.location.replace("/penjualan.php");
+                                    },1000);
+                                },3000);
+                            }
+                        }
+                        
+                        console.log(id);
+                    }
+                }
+                xhttp.onreadystatechange = stateck;
+                if(id_table == null) xhttp.open("GET", "ajaxScanTambahPenjualan.php", true);
+                else xhttp.open("GET", "ajaxScanTambahPenjualan.php?id="+id, true);
+                xhttp.send(null);
+            }
+
             $('#myTable').DataTable({
                 scrollX:true,
+            });
+
+            $('#staticBackdrop').on('shown.bs.modal', function (e) {
+                console.log("Modal Opened, close in 3 seconds");
+                
+                // $('#staticBackdrop').modal('hide');
+
+                interval = setInterval(function() {
+                    functionDetectCard(id_table);
+                }, 1000);
+            });
+
+            $('#staticBackdrop').on('hidden.bs.modal', function (e) {                
+                var xhttp = new XMLHttpRequest();      
+                xhttp.open("GET", "deleteScanTambahPenjualan.php", true);
+                xhttp.send(null);
+                clearInterval(interval);
             });
         } );
     </script>

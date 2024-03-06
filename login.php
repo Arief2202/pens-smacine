@@ -1,14 +1,14 @@
 <?php
   session_start();
   if(isset($_SESSION['username'])){
-    header("Location: /beranda.php");
+    header("Location: /data-gudang.php");
     exit();
   }
 
   if(isset($_POST['username']) && isset($_POST['password'])){
     if($_POST['username'] == "admin" && $_POST['password'] == "admin"){      
       $_SESSION['username'] = "admin";
-      header("Location: /beranda.php");
+      header("Location: /data-gudang.php");
       exit();
     }
     else{

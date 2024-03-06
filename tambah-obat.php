@@ -9,13 +9,13 @@
 
   if(isset($_POST['logout'])){
     $_SESSION['username'] = null;
-    header("Location: /login.php");
+    header("Location: /");
     exit();
   }
   if(isset($_POST['create']) && $_POST['create'] == '1'){
     $sql = "INSERT INTO `data_gudang` 
-    (`id`, `nama_obat`, `jenis_obat`, `kandungan_obat`, `jumlah_penerimaan`, `tanggal_penerimaan`, `tanggal_kadaluarsa`, `created_at`) VALUES 
-    (NULL, '".$_POST['nama_obat']."', '".$_POST['jenis_obat']."', '".$_POST['kandungan_obat']."', '".$_POST['jumlah_penerimaan']."', '".$_POST['tanggal_penerimaan']."', '".$_POST['tanggal_kadaluarsa']."', current_timestamp());";
+    (`id`, `nama_obat`, `jenis_obat`, `kandungan_obat`, `jumlah_perbox`, `lokasi_rak`, `harga`, `tanggal_penerimaan`, `tanggal_kadaluarsa`, `created_at`) VALUES 
+    (NULL, '".$_POST['nama_obat']."', '".$_POST['jenis_obat']."', '".$_POST['kandungan_obat']."', '".$_POST['jumlah_perbox']."', '".$_POST['lokasi_rak']."', '".$_POST['harga']."', '".$_POST['tanggal_penerimaan']."', '".$_POST['tanggal_kadaluarsa']."', current_timestamp());";
     $result = mysqli_query($koneksi, $sql);
     if($result){
         $sql = "SELECT * FROM `data_gudang` ORDER BY id DESC";
@@ -37,7 +37,9 @@
     `nama_obat` = '".$_POST['nama_obat']."', 
     `jenis_obat` = '".$_POST['jenis_obat']."', 
     `kandungan_obat` = '".$_POST['kandungan_obat']."',
-    `jumlah_penerimaan` = '".$_POST['jumlah_penerimaan']."',
+    `jumlah_perbox` = '".$_POST['jumlah_perbox']."',
+    `lokasi_rak` = '".$_POST['lokasi_rak']."',
+    `harga` = '".$_POST['harga']."',
     `tanggal_penerimaan` = '".$_POST['tanggal_penerimaan']."',
     `tanggal_kadaluarsa` = '".$_POST['tanggal_kadaluarsa']."'     
     WHERE `data_gudang`.`id` = ".$_POST['id'].";";
@@ -75,9 +77,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link me-3" href="/beranda.php">Beranda</a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link me-3 active" aria-current="page" href="/data-gudang.php"><b>Data Gudang</b></a>
                 </li>
@@ -155,8 +154,16 @@
             <textarea class="form-control" name="kandungan_obat"><?php if(isset($_GET['id'])) echo $result->kandungan_obat; ?></textarea>
         </div>
         <div class="mb-3">
-            <label class="form-label">Jumlah Penerimaan</label>
-            <input type="number" class="form-control" name="jumlah_penerimaan" <?php if(isset($_GET['id'])) echo "value=\"".$result->jumlah_penerimaan."\""; ?>>
+            <label class="form-label">Jumlah Perbox</label>
+            <input type="number" class="form-control" name="jumlah_perbox" <?php if(isset($_GET['id'])) echo "value=\"".$result->jumlah_perbox."\""; ?>>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Lokasi Rak</label>
+            <input type="text" class="form-control" name="lokasi_rak" <?php if(isset($_GET['id'])) echo "value=\"".$result->lokasi_rak."\""; ?>>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Harga</label>
+            <input type="number" class="form-control" name="harga" <?php if(isset($_GET['id'])) echo "value=\"".$result->harga."\""; ?>>
         </div>
         <div class="mb-3">
             <label class="form-label">Tanggal Penerimaan</label>
