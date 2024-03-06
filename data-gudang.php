@@ -9,7 +9,7 @@
 
     if(isset($_POST['logout'])){
         $_SESSION['username'] = null;
-        header("Location: /login.php");
+        header("Location: /");
         exit();
     }
     if(isset($_POST['delete'])){
